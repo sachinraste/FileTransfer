@@ -4,7 +4,7 @@ There is an issue with sftp.js (client-side) which incorrectly handles Int64 ie.
 
 The modifications done are as follows : also visit Line no 2571
 
-//
+```
 var Int64 = function(a1, offset) {
   offset= offset || 0;
   if (typeof Buffer !== 'undefined' && a1 instanceof Buffer) {
@@ -51,4 +51,4 @@ Int64.prototype = {
     return negate ? -x : x;
   }
 };
-//
+```

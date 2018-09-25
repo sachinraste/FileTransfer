@@ -5,14 +5,11 @@ var express = require('express')
   , nib = require('nib')
   , stylus = require('stylus')
   ,os = require('os')
-//  , wdl = require('windows-drive-letters')
   , SFTP = require("sftp-ws")
   , childProcess = require('child_process');
 
-//var command = 'echo Caption && mountvol /L | find ":\\"';
-
 var command = '';
-var virtualRoot = '';
+
 var operatingSystem = os.platform().toLowerCase()
 console.log('Operating System : ' , operatingSystem );
 switch (operatingSystem) {
@@ -20,10 +17,10 @@ switch (operatingSystem) {
             command = './GetDrive.sh';
             break;
         case'linux':
-			command = './GetDrive.sh';
+            command = './GetDrive.sh';
             break;
-		case'win32':
-			command = 'GetDrive.exe';
+	case'win32':
+            command = 'GetDrive.exe';
             break;
         default:
             command = './GetDrive.sh';
@@ -58,7 +55,7 @@ app.configure('development', function(){
 });
 
 var sftp=[]; 
-//var letters = wdl.usedLettersSync().sort();
+
 var letters = usedLettersSync();
 app.get('/', routes.index(letters));
 
@@ -66,27 +63,28 @@ app.on('upgrade', function (req, socket, head) {
   console.log("proxying upgrade request", req.url);
   //proxy.ws(req, socket, head);
 });
-//app.use(express.static(process.cwd() + '/client' ));
+
 // create a HTTP server for the express app
 
 var server = http.createServer(app);
 letters.forEach(a);
 
 function a(item,index){
-	var virtualRoot;
-	if (operatingSystem = 'linux') {
-		sftp.push(new SFTP.Server({
+	var driveLetter = item.Drive;
+
+	if (operatingSystem === 'linux') { 
+	sftp.push(new SFTP.Server({
 			server: server,
-			virtualRoot: item.Drive,
-			path: '/'+item.Drive,
+			virtualRoot: driveLetter ,
+			path: '/' + driveLetter,
 			log: console // log to console
-		}));
-	}
-	else {
-		sftp.push(new SFTP.Server({
+		}));	
+		
+	} else {
+	sftp.push(new SFTP.Server({
 			server: server,
-			virtualRoot: item.Drive+':\\',
-			path: '/'+item.Drive,
+			virtualRoot: driveLetter + ':\\',
+			path: '/' + driveLetter,
 			log: console // log to console
 		}));	
 	}
@@ -100,17 +98,10 @@ server.listen(port, host, function () {
     var host = server.address().address;
     console.log('HTTP server listening at http://%s:%s', host, port);
 	sftp.forEach(b);
-	//console.log(usedLettersSync());
 });
 
 function usedLettersSync() {
 	var stdout = childProcess.execSync(command);
 	var letters = stdout.toString();
-
-   //var letters = tableParser.parse(a).map((caption) => {
-    //return caption.Caption[0].replace(':\\','').replace('\\','');
-  //});
-  return JSON.parse(letters);
+	return JSON.parse(letters);
 }
-
-
